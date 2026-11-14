@@ -1,6 +1,6 @@
 {
-  "name": "@x3/811-tickets",
-  "version": "1.0.0",
+  "name": "x3-811-tickets",
+  "version": "1.0.1",
   "description": "The 811 call-before-you-dig clock: earliest legal dig time, utility response deadline and ticket expiry under state one-call law (MI, OH, TX built in), plus a ticket email parser.",
   "type": "module",
   "main": "dist/index.js",
@@ -50,5 +50,8 @@
   },
   "devDependencies": {
     "typescript": "^5.6.0"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }

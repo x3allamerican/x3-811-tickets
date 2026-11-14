@@ -13,13 +13,13 @@ Built and maintained by **[X3 Pipeline](https://x3pipeline.com)**.
 ## Install
 
 ```sh
-npm install github:x3allamerican/x3-811-tickets
+npm install x3-811-tickets
 ```
 
 ## Use
 
 ```ts
-import { digClock, responseStatus, parseTicket, federalHolidays } from '@x3/811-tickets';
+import { digClock, responseStatus, parseTicket, federalHolidays } from 'x3-811-tickets';
 
 const clock = digClock({
   state: 'MI',
@@ -52,7 +52,7 @@ parseTicket(emailBody);
 ## Add a state
 
 ```ts
-import { digClock, type StateRule } from '@x3/811-tickets';
+import { digClock, type StateRule } from 'x3-811-tickets';
 
 const rule: StateRule = {
   state: 'Example', center: 'Example 811', timeZone: 'America/New_York',

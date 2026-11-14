@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>811 Dig Date Calculator (Michigan, Ohio, Texas) | Free tool by X3 Pipeline</title>
+<meta name="description" content="Free 811 calculator: when can you legally start digging, when must every utility mark, and when does the ticket expire, under Michigan, Ohio and Texas one-call law. Plus a ticket email parser. Open source.">
+<link rel="stylesheet" href="demo.css">
+</head>
+<body>
+<header class="top">
+  <a class="brand" href="https://x3pipeline.com"><b>X3</b> Pipeline</a>
+  <nav><a href="https://github.com/x3allamerican/x3-811-tickets">Source on GitHub</a><a href="https://x3pipeline.com">X3 Pipeline</a></nav>
+</header>
+<main>
+  <h1>When can you <span>dig?</span></h1>
+  <p class="lede">Enter when the 811 locate request was made. See the earliest legal start, when every utility must have marked, the latest start the ticket allows and when it expires, under the state's one-call law, with the statute cited. Runs in your browser.</p>
+  <div class="grid">
+    <section class="box">
+      <h2>The request</h2>
+      <div class="row">
+        <div><label for="st">State</label><select id="st"><option value="MI">Michigan (MISS DIG 811)</option><option value="OH">Ohio (OHIO811)</option><option value="TX">Texas (Texas811)</option></select></div>
+        <div><label for="at">Request made (local time)</label><input id="at" type="datetime-local" value="2026-11-06T18:30"></div>
+      </div>
+      <div class="row">
+        <div><label for="ps">Planned start (optional)</label><input id="ps" type="datetime-local"></div>
+        <div><label for="hol">Holidays</label><select id="hol"><option value="fed">Federal holidays</option><option value="none">None</option></select></div>
+      </div>
+      <label style="display:flex;gap:8px;align-items:center;font-weight:500"><input type="checkbox" id="long" style="width:auto"> Project will take longer than the normal ticket life</label>
+    </section>
+    <section class="box">
+      <h2>The clock</h2>
+      <div class="kpis" id="kpis"></div>
+      <ul class="list" id="out"></ul>
+    </section>
+  </div>
+  <section class="box" style="margin-top:18px">
+    <h2>Paste a ticket email</h2>
+    <div class="grid">
+      <textarea id="tk" spellcheck="false"></textarea>
+      <pre id="tkout" style="margin:0"></pre>
+    </div>
+  </section>
+  <p class="small" style="margin-top:22px">Decision support, not legal advice. Business days follow your notification center's posted holidays; check them. Interstate pipelines and emergencies have their own rules. Want another state? The rules are data: <a href="https://github.com/x3allamerican/x3-811-tickets#add-a-state">add one</a>.</p>
+</main>
+<footer>Free and open source (MIT) from <a href="https://x3pipeline.com">X3 Pipeline</a>: pipeline integrity, damage prevention, operator qualification and the rest of your PHMSA program in one place.</footer>
+<script type="module">
+import { digClock, parseTicket, STATE_RULES } from './tickets.js';
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+function zoned(local, tz) {
+  const guess = new Date(local + ':00Z');
+  const p = Object.fromEntries(new Intl.DateTimeFormat('en-US', { timeZone: tz, hourCycle: 'h23', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' }).formatToParts(guess).map((x) => [x.type, x.value]));
+  return new Date(guess.getTime() - (Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour, +p.minute) - guess.getTime())).toISOString();
+}
+function run() {
+  const st = $('st').value; const tz = STATE_RULES[st].timeZone;
+  const fmt = (iso) => iso ? new Date(iso).toLocaleString('en-US', { timeZone: tz, weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : 'n/a';
+  try {
+    const r = digClock({ state: st, noticeAt: zoned($('at').value, tz), plannedStart: $('ps').value ? zoned($('ps').value, tz) : undefined, holidays: $('hol').value === 'none' ? [] : undefined, longProject: $('long').checked });
+    $('kpis').innerHTML = [[fmt(r.earliestStart), 'Earliest legal start'], [fmt(r.responsesDue), 'Utilities must respond by'], [fmt(r.latestStart), 'Latest start on this ticket'], [fmt(r.expires), 'Ticket expires']]
+      .map(([v, k]) => `<div class="kpi"><b style="font-size:16px">${esc(v)}</b><span>${k}</span></div>`).join('');
+    $('out').innerHTML = r.problems.map((p) => `<li><span class="pill bad">Problem</span> ${esc(p)}</li>`).join('') + r.steps.map((s) => `<li>${esc(s)}</li>`).join('')
+      + `<li class="small">${r.citations.map(esc).join(' · ')}</li>` + r.notes.map((n) => `<li class="small">${esc(n)}</li>`).join('');
+  } catch (e) { $('out').innerHTML = `<li><span class="pill warn">Check</span> ${esc(e.message)}</li>`; $('kpis').innerHTML = ''; }
+}
+$('tk').value = `Ticket No: 2026110200123     Type: NORMAL     Rev: 000
+Taken: 11/02/26 10:04   Work to Begin: 11/05/26 10:15   Expires: 11/26/26
+Excavator: EXAMPLE EXCAVATING LLC     Contact: PAT SAMPLE
+Type of Work: INSTALL WATER SERVICE     Done For: CITY OF EXAMPLE
+State: MI   County: INGHAM   Place: LANSING
+Address: 100 MAIN ST
+Location: MARK ENTIRE FRONT LOT
+  AND 10 FT INTO ROADWAY
+Lat/Long: 42.73350, -84.55550
+Members:
+CONSUMERS GAS   AT&T MICHIGAN   CITY WATER`;
+const parse = () => { const { fields, ...t } = parseTicket($('tk').value); $('tkout').textContent = JSON.stringify(t, null, 2); };
+document.querySelectorAll('main input, main select').forEach((el) => el.addEventListener('input', run));
+$('tk').addEventListener('input', parse);
+run(); parse();
+</script>
+</body>
+</html>

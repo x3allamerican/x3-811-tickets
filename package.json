@@ -1,0 +1,54 @@
+{
+  "name": "@x3/811-tickets",
+  "version": "1.0.0",
+  "description": "The 811 call-before-you-dig clock: earliest legal dig time, utility response deadline and ticket expiry under state one-call law (MI, OH, TX built in), plus a ticket email parser.",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "data",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node scripts/fix-dts.mjs",
+    "test": "node --test \"test/*.test.ts\"",
+    "prepare": "npm run build"
+  },
+  "keywords": [
+    "811",
+    "call-before-you-dig",
+    "one-call",
+    "damage-prevention",
+    "excavation",
+    "locate",
+    "miss-dig",
+    "ohio811",
+    "texas811",
+    "pipeline-safety",
+    "utilities"
+  ],
+  "author": "X3 Pipeline (https://x3pipeline.com)",
+  "license": "MIT",
+  "homepage": "https://github.com/x3allamerican/x3-811-tickets#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/x3allamerican/x3-811-tickets.git"
+  },
+  "bugs": {
+    "url": "https://github.com/x3allamerican/x3-811-tickets/issues"
+  },
+  "engines": {
+    "node": ">=22.6"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0"
+  }
+}
